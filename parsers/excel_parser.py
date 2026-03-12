@@ -1,42 +1,33 @@
-import openpyxl
-from typing import List, Dict, Any
+from openpyxl import load_workbook
+from typing import List, Dict
 
 
 class ExcelParser:
-    """Parse Excel questionnaires and extract questions."""
+    """Parse Excel questionnaires to extract questions."""
     
     def __init__(self, filepath: str):
         self.filepath = filepath
-        self.workbook = None
-        self.worksheet = None
+        self.wb = load_workbook(filepath)
+        self.ws = self.wb.active
     
-    def extract_questions(self) -> List[Dict[str, Any]]:
-        try:
-            self.workbook = openpyxl.load_workbook(self.filepath)
-            self.worksheet = self.workbook.active
-            
-            questions = []
-            
-            for row_idx, row in enumerate(self.worksheet.iter_rows(min_row=2, values_only=False), start=2):
-                if not row[0].value:
-                    continue
-                
-                question_num = row[0].value
-                question_text = row[1].value if len(row) > 1 else None
-                
-                if question_text:
-                    questions.append({
-                        'number': question_num,
-                        'question': str(question_text),
-                        'row': row_idx,
-                        'cell_ref': f'C{row_idx}'
-                    })
-            
-            return questions
+    def parse(self) -> List[Dict]:
+        """Extract questions from Excel."""
+        questions = []
         
-        except Exception as e:
-            raise FileNotFoundError(f"Failed to parse Excel: {e}")
-    
-    def close(self):
-        if self.workbook:
-            self.workbook.close()
+        # Skip header row (row 1)
+        for row_idx, row in enumerate(self.ws.iter_rows(min_row=2, values_only=False), start=2):
+            if row[0].value is None:
+                continue
+            
+            question_num = row[0].value
+            question_text = row[1].value
+            
+            if question_text:
+                questions.append({
+                    'number': question_num,
+                    'question': question_text,
+                    'row': row_idx,
+                    'cell_ref': row[2].coordinate  # Answer column
+                })
+        
+        return questions

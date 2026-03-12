@@ -1,47 +1,53 @@
-import os
 from pathlib import Path
-from typing import Dict, List
-import pdfplumber
+from typing import Optional
 
 
 class DocLoader:
-    """Load and process compliance documentation."""
+    """Load compliance documentation from files."""
     
     def __init__(self, docs_dir: str):
         self.docs_dir = Path(docs_dir)
-        self.docs = {}
     
-    def load_all_docs(self) -> Dict[str, str]:
-        docs = {}
-        
+    def load_all(self) -> str:
+        """Load all documents from the directory."""
         if not self.docs_dir.exists():
-            return docs
+            return ""
         
-        for txt_file in self.docs_dir.glob('*.txt'):
+        all_docs = []
+        
+        # Load text files
+        for txt_file in self.docs_dir.glob("*.txt"):
             try:
                 with open(txt_file, 'r', encoding='utf-8') as f:
-                    docs[txt_file.name] = f.read()
+                    content = f.read()
+                    all_docs.append(f"--- {txt_file.name} ---\n{content}")
             except Exception as e:
-                print(f"Warning: Failed to load {txt_file.name}: {e}")
+                print(f"Warning: Could not read {txt_file}: {e}")
         
-        for pdf_file in self.docs_dir.glob('*.pdf'):
-            try:
-                text = ""
-                with pdfplumber.open(pdf_file) as pdf:
-                    for page in pdf.pages:
-                        text += page.extract_text() or ""
-                docs[pdf_file.name] = text
-            except Exception as e:
-                print(f"Warning: Failed to load {pdf_file.name}: {e}")
+        # Load PDF files (if pdfplumber is available)
+        try:
+            import pdfplumber
+            for pdf_file in self.docs_dir.glob("*.pdf"):
+                try:
+                    with pdfplumber.open(pdf_file) as pdf:
+                        text = "\n".join([page.extract_text() for page in pdf.pages if page.extract_text()])
+                        all_docs.append(f"--- {pdf_file.name} ---\n{text}")
+                except Exception as e:
+                    print(f"Warning: Could not read {pdf_file}: {e}")
+        except ImportError:
+            pass
         
-        self.docs = docs
-        return docs
-    
-    def combine_docs(self, docs: Dict[str, str]) -> str:
-        combined = ""
-        for filename, content in docs.items():
-            combined += f"\n\n--- Document: {filename} ---\n{content}"
-        return combined
-    
-    def get_doc_summary(self, docs: Dict[str, str]) -> Dict[str, int]:
-        return {name: len(content) for name, content in docs.items()}
+        # Load DOCX files (if python-docx is available)
+        try:
+            from docx import Document
+            for docx_file in self.docs_dir.glob("*.docx"):
+                try:
+                    doc = Document(docx_file)
+                    text = "\n".join([para.text for para in doc.paragraphs])
+                    all_docs.append(f"--- {docx_file.name} ---\n{text}")
+                except Exception as e:
+                    print(f"Warning: Could not read {docx_file}: {e}")
+        except ImportError:
+            pass
+        
+        return "\n\n".join(all_docs)
