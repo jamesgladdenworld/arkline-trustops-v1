@@ -1,0 +1,43 @@
+SAMPLE COMPLIANCE DOCUMENTATION
+================================
+
+Company: Acme SaaS Inc.
+Last Updated: March 2026
+
+1. INFORMATION SECURITY PROGRAM
+- We maintain a comprehensive information security program aligned with NIST Cybersecurity Framework
+- Security policies are reviewed and updated annually
+- All employees complete mandatory security training annually
+- Incident response procedures are documented and tested quarterly
+
+2. ACCESS CONTROL
+- Role-based access control (RBAC) is implemented across all systems
+- Multi-factor authentication (MFA) is required for all administrative access
+- Password policies enforce minimum 12 characters with complexity requirements
+- Access reviews are conducted quarterly and documented
+- Privileged access is logged and monitored in real-time
+
+3. DATA PROTECTION
+- Data is encrypted at rest using AES-256 encryption
+- Data in transit is encrypted using TLS 1.2 or higher
+- Database encryption keys are stored in a hardware security module (HSM)
+- Regular backups are performed daily and tested monthly
+- Data retention policies are documented and enforced
+
+4. VULNERABILITY MANAGEMENT
+- Vulnerability scanning is performed monthly on all systems
+- Penetration testing is conducted annually by third-party firm
+- Security patches are applied within 30 days of release
+- A patch management process is documented and followed
+
+5. INCIDENT RESPONSE
+- An incident response plan is documented and tested annually
+- Security incidents are logged and investigated
+- Incidents are reported to affected customers within 24 hours
+- Post-incident reviews are conducted for all major incidents
+
+6. COMPLIANCE CERTIFICATIONS
+- SOC 2 Type II audit completed in December 2025
+- ISO 27001 certification obtained in January 2026
+- GDPR compliance verified by legal team
+- CCPA compliance implemented and documented

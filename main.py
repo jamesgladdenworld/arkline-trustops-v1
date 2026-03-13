@@ -19,10 +19,9 @@ from dotenv import load_dotenv
 from parsers import ExcelParser, DocLoader
 from agents import ResponseGenerator, ResponseReviewer
 from exporters import ExcelExporter
-from config import INPUT_DIR, OUTPUT_DIR
 
 
-def main():
+def main(customer_name: str):
     # Load environment variables
     load_dotenv()
     api_key = os.getenv('ANTHROPIC_API_KEY')
@@ -32,16 +31,28 @@ def main():
         print("Please create a .env file with: ANTHROPIC_API_KEY=your_key_here")
         sys.exit(1)
     
-    print("🚀 Arkline TrustOps v1 - Security Questionnaire Completion Tool")
+    # Setup customer directories
+    customer_dir = Path("customers") / customer_name
+    input_dir = customer_dir / "input"
+    output_dir = customer_dir / "output"
+    logs_dir = customer_dir / "logs"
+    
+    print("\n🚀 Arkline TrustOps v1 - Security Questionnaire Completion Tool")
+    print(f"📊 Customer: {customer_name}")
     print("="*80)
+    
+    # Validate customer directory exists
+    if not input_dir.exists():
+        print(f"❌ Error: Customer directory not found: {input_dir}")
+        print(f"Run this first: python3 setup_customer.py {customer_name}")
+        sys.exit(1)
     
     # Step 1: Parse questionnaire
     print("\n📋 Step 1: Parsing questionnaire...")
-    questionnaire_path = INPUT_DIR / "questionnaire.xlsx"
+    questionnaire_path = input_dir / "questionnaire.xlsx"
     
     if not questionnaire_path.exists():
         print(f"❌ Error: {questionnaire_path} not found")
-        print(f"Please place your questionnaire at: {questionnaire_path}")
         sys.exit(1)
     
     parser = ExcelParser(str(questionnaire_path))
@@ -50,12 +61,12 @@ def main():
     
     # Step 2: Load compliance documentation
     print("\n📚 Step 2: Loading compliance documentation...")
-    doc_loader = DocLoader(INPUT_DIR / "compliance_docs")
+    compliance_docs_dir = input_dir / "compliance_docs"
+    doc_loader = DocLoader(str(compliance_docs_dir))
     docs = doc_loader.load_all()
     
     if not docs:
         print("⚠️  Warning: No compliance documents found")
-        print(f"Place documents in: {INPUT_DIR / 'compliance_docs'}")
         docs = "No documentation provided."
     else:
         print(f"✅ Loaded compliance documentation ({len(docs)} characters)")
@@ -84,7 +95,7 @@ def main():
     
     # Step 5: Export results
     print("\n💾 Step 5: Exporting completed questionnaire...")
-    output_path = OUTPUT_DIR / f"questionnaire_completed_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
+    output_path = output_dir / f"questionnaire_completed_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
     exporter = ExcelExporter(str(questionnaire_path), str(output_path))
     exporter.export_responses(review_results['approved'])
     
@@ -98,7 +109,7 @@ def main():
         'timestamp': datetime.now().isoformat()
     }
     
-    summary_path = OUTPUT_DIR / f"summary_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
+    summary_path = output_dir / f"summary_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
     exporter.export_summary(summary, str(summary_path))
     
     print("\n" + "="*80)
@@ -106,8 +117,16 @@ def main():
     print(f"📁 Output files:")
     print(f"   - Completed questionnaire: {output_path}")
     print(f"   - Summary: {summary_path}")
-    print("="*80)
+    print("="*80 + "\n")
 
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) < 2:
+        print("Usage: python3 main.py <customer_name>")
+        print("Example: python3 main.py acme_saas")
+        print("\nFirst, setup the customer directory:")
+        print("  python3 setup_customer.py acme_saas")
+        sys.exit(1)
+    
+    customer_name = sys.argv[1]
+    main(customer_name)
