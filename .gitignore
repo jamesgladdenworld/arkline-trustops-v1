@@ -1,25 +1,24 @@
-# Environment
-.env
-.env.local
+# Customer data (never commit to Git)
+customers/
+data/
 
-# Python
+# Python cache and logs
 __pycache__/
-*.py[cod]
-*.egg-info/
-.Python
-build/
-dist/
+*.pyc
+.pytest_cache/
+*.log
+
+# Environment and virtual environment
+.env
 venv/
-ENV/
 
 # IDE
 .vscode/
 .idea/
 *.swp
-
-# Data
-data/output/
-data/cache/
+*.swo
 
 # OS
 .DS_Store
+Thumbs.db
+
