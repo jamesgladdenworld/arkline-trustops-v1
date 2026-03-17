@@ -1,0 +1,87 @@
+{
+  "teams": {
+    "security_team": {
+      "description": "Security and compliance specialists",
+      "members": ["alice@company.com", "bob@company.com"],
+      "slack_channel": "#security-approvals",
+      "email_enabled": true
+    },
+    "engineering_team": {
+      "description": "Infrastructure and architecture engineers",
+      "members": ["charlie@company.com", "diana@company.com"],
+      "slack_channel": "#engineering-approvals",
+      "email_enabled": true
+    },
+    "general_team": {
+      "description": "General reviewers (fallback)",
+      "members": ["reviewer@company.com"],
+      "slack_channel": "#general-approvals",
+      "email_enabled": true
+    }
+  },
+  "routing_rules": [
+    {
+      "name": "High-risk security questions",
+      "priority": 1,
+      "conditions": {
+        "keywords": ["encryption", "authentication", "authorization", "vulnerability", "breach", "compliance"],
+        "confidence_max": 0.7,
+        "confidence_min": 0
+      },
+      "target_team": "security_team",
+      "notification_level": "urgent"
+    },
+    {
+      "name": "Infrastructure and deployment",
+      "priority": 2,
+      "conditions": {
+        "keywords": ["infrastructure", "deployment", "kubernetes", "docker", "cloud", "aws", "gcp", "azure"],
+        "confidence_max": 1.0,
+        "confidence_min": 0
+      },
+      "target_team": "engineering_team",
+      "notification_level": "normal"
+    },
+    {
+      "name": "Low confidence answers",
+      "priority": 3,
+      "conditions": {
+        "keywords": [],
+        "confidence_max": 0.5,
+        "confidence_min": 0
+      },
+      "target_team": "security_team",
+      "notification_level": "urgent"
+    },
+    {
+      "name": "Default routing",
+      "priority": 999,
+      "conditions": {
+        "keywords": [],
+        "confidence_max": 1.0,
+        "confidence_min": 0
+      },
+      "target_team": "general_team",
+      "notification_level": "normal"
+    }
+  ],
+  "notification_channels": {
+    "cli": {
+      "enabled": true,
+      "format": "console"
+    },
+    "email": {
+      "enabled": false,
+      "smtp_server": "smtp.company.com",
+      "from_address": "arkline@company.com"
+    },
+    "slack": {
+      "enabled": false,
+      "webhook_url": "https://hooks.slack.com/services/YOUR/WEBHOOK/URL"
+    },
+    "in_app": {
+      "enabled": false,
+      "database": "notifications.db"
+    }
+  }
+}
